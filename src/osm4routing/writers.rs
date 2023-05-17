@@ -5,18 +5,7 @@ pub fn csv(nodes: Vec<Node>, edges: Vec<Edge>) {
     let mut edges_csv = csv::Writer::from_path(edges_path).unwrap();
     edges_csv
         .serialize(vec![
-            "id",
-            "osm_id",
-            "source",
-            "target",
-            "length",
-            "foot",
-            "car_forward",
-            "car_backward",
-            "bike_forward",
-            "bike_backward",
-            "train",
-            "wkt",
+            "id", "osm_id", "source", "target", "length", "railway", "tags", "wkt",
         ])
         .expect("CSV: unable to write edge header");
     for edge in edges {
@@ -27,12 +16,8 @@ pub fn csv(nodes: Vec<Node>, edges: Vec<Edge>) {
                 edge.source.0,
                 edge.target.0,
                 edge.length(),
-                edge.properties.foot,
-                edge.properties.car_forward,
-                edge.properties.car_backward,
-                edge.properties.bike_forward,
-                edge.properties.bike_backward,
-                edge.properties.train,
+                edge.properties.railway,
+                edge.tags.clone(),
                 edge.as_wkt(),
             ))
             .expect("CSV: unable to write edge");

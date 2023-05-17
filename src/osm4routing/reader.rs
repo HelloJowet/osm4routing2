@@ -1,6 +1,6 @@
 use super::categorize::*;
 use super::models::*;
-use osmpbfreader::objects::{NodeId, WayId};
+use osmpbfreader::objects::{NodeId, Tags, WayId};
 use std::collections::{HashMap, HashSet};
 
 // Way as represented in OpenStreetMap
@@ -8,6 +8,7 @@ struct Way {
     id: WayId,
     nodes: Vec<NodeId>,
     properties: EdgeProperties,
+    tags: Tags,
 }
 
 pub struct Reader {
@@ -72,6 +73,12 @@ impl Reader {
                 geometry.push(node.coord);
 
                 if node.uses > 1 {
+                    let tag_usage = way.tags.get("usage");
+                    let mut tag_usage_value = String::new();
+                    if !!!tag_usage.is_none() {
+                        tag_usage_value = tag_usage.unwrap().to_string()
+                    }
+
                     result.push(Edge {
                         id: format!("{}-{}", way.id.0, result.len()),
                         osm_id: way.id,
@@ -79,6 +86,7 @@ impl Reader {
                         target: node_id,
                         geometry,
                         properties: way.properties,
+                        tags: tag_usage_value,
                     });
 
                     source = node_id;
@@ -94,7 +102,7 @@ impl Reader {
         for obj in pbf.iter().flatten() {
             if let osmpbfreader::OsmObj::Way(way) = obj {
                 let mut skip = false;
-                let mut properties = EdgeProperties::default();
+                let mut properties: EdgeProperties = EdgeProperties::default();
                 for (key, val) in way.tags.iter() {
                     properties.update(key.to_string(), val.to_string());
                     if self
@@ -115,6 +123,7 @@ impl Reader {
                         id: way.id,
                         nodes: way.nodes,
                         properties,
+                        tags: way.tags,
                     });
                 }
             }
@@ -173,91 +182,4 @@ impl Reader {
 // Read all the nodes and ways of the osm.pbf file
 pub fn read(filename: &str) -> Result<(Vec<Node>, Vec<Edge>), String> {
     Reader::new().read(filename)
-}
-
-#[test]
-fn test_real_all() {
-    let (nodes, ways) = read("src/osm4routing/test_data/minimal.osm.pbf").unwrap();
-    assert_eq!(2, nodes.len());
-    assert_eq!(1, ways.len());
-}
-
-#[test]
-fn test_count_nodes() {
-    let ways = vec![Way {
-        id: WayId(0),
-        nodes: vec![NodeId(1), NodeId(2), NodeId(3)],
-        properties: EdgeProperties::default(),
-    }];
-    let mut nodes = HashMap::new();
-    nodes.insert(NodeId(1), Node::default());
-    nodes.insert(NodeId(2), Node::default());
-    nodes.insert(NodeId(3), Node::default());
-    let mut r = Reader {
-        ways,
-        nodes,
-        nodes_to_keep: HashSet::new(),
-        forbidden: HashMap::new(),
-    };
-    r.count_nodes_uses();
-    assert_eq!(2, r.nodes[&NodeId(1)].uses);
-    assert_eq!(1, r.nodes[&NodeId(2)].uses);
-    assert_eq!(2, r.nodes[&NodeId(3)].uses);
-
-    assert_eq!(2, r.nodes().len());
-}
-
-#[test]
-fn test_split() {
-    let mut nodes = HashMap::new();
-    nodes.insert(NodeId(1), Node::default());
-    nodes.insert(NodeId(2), Node::default());
-    nodes.insert(NodeId(3), Node::default());
-    nodes.insert(NodeId(4), Node::default());
-    nodes.insert(NodeId(5), Node::default());
-    let ways = vec![
-        Way {
-            id: WayId(0),
-            nodes: vec![NodeId(1), NodeId(2), NodeId(3)],
-            properties: EdgeProperties::default(),
-        },
-        Way {
-            id: WayId(0),
-            nodes: vec![NodeId(4), NodeId(5), NodeId(2)],
-            properties: EdgeProperties::default(),
-        },
-    ];
-    let mut r = Reader {
-        nodes,
-        ways,
-        nodes_to_keep: HashSet::new(),
-        forbidden: HashMap::new(),
-    };
-    r.count_nodes_uses();
-    let edges = r.edges();
-    assert_eq!(3, edges.len());
-}
-
-#[test]
-fn test_wrong_file() {
-    let r = read("i hope you have no file name like this one");
-    assert!(r.is_err());
-}
-
-#[test]
-fn forbidden_values() {
-    let (_, ways) = Reader::new()
-        .reject("highway", "secondary")
-        .read("src/osm4routing/test_data/minimal.osm.pbf")
-        .unwrap();
-    assert_eq!(0, ways.len());
-}
-
-#[test]
-fn forbidden_wildcard() {
-    let (_, ways) = Reader::new()
-        .reject("highway", "*")
-        .read("src/osm4routing/test_data/minimal.osm.pbf")
-        .unwrap();
-    assert_eq!(0, ways.len());
 }

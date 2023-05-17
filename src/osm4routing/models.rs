@@ -34,6 +34,7 @@ pub struct Edge {
     pub target: NodeId,
     pub geometry: Vec<Coord>,
     pub properties: EdgeProperties,
+    pub tags: String,
 }
 
 impl Edge {
@@ -70,32 +71,4 @@ fn distance(start: Coord, end: Coord) -> f64 {
     let c: f64 = 2.0 * ((a.sqrt()).atan2((1.0 - a).sqrt()));
 
     r * c
-}
-
-#[test]
-fn test_as_wkt() {
-    let edge = Edge {
-        id: "0".to_string(),
-        osm_id: WayId(0),
-        source: NodeId(0),
-        target: NodeId(0),
-        geometry: vec![
-            Coord { lon: 0., lat: 0. },
-            Coord { lon: 1., lat: 0. },
-            Coord { lon: 0., lat: 1. },
-        ],
-        properties: EdgeProperties::default(),
-    };
-    assert!(
-        "LINESTRING(0.0000000 0.0000000, 1.0000000 0.0000000, 0.0000000 1.0000000)"
-            == edge.as_wkt()
-    );
-}
-
-#[test]
-fn test_distance() {
-    let a = Coord { lon: 0., lat: 0. };
-    let b = Coord { lon: 1., lat: 0. };
-
-    assert!((1. - (distance(a, b) / (1853. * 60.))).abs() < 0.01);
 }

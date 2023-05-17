@@ -1,5 +1,5 @@
 [package]
-name = "osm4routing"
+name = "osm4routing-railway"
 edition = "2021"
 version = "0.5.3"
 authors = ["Tristram Gräbener <tristramg@gmail.com>"]

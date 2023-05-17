@@ -1,6 +1,5 @@
 fn main() {
-    const USAGE: &str = "
-Usage: osm4routing <source.osm.pbf>";
+    const USAGE: &str = "Usage: osm4routing <source.osm.pbf>";
     let args = docopt::Docopt::new(USAGE)
         .unwrap()
         .parse()
