@@ -1,6 +1,6 @@
 use super::categorize::*;
 use super::models::*;
-use osmpbfreader::objects::{NodeId, Tags, WayId};
+use osmpbfreader::objects::{NodeId, WayId};
 use std::collections::{HashMap, HashSet};
 
 // Way as represented in OpenStreetMap
@@ -8,7 +8,6 @@ struct Way {
     id: WayId,
     nodes: Vec<NodeId>,
     properties: EdgeProperties,
-    tags: Tags,
 }
 
 pub struct Reader {
@@ -73,20 +72,13 @@ impl Reader {
                 geometry.push(node.coord);
 
                 if node.uses > 1 {
-                    let tag_usage = way.tags.get("usage");
-                    let mut tag_usage_value = String::new();
-                    if !!!tag_usage.is_none() {
-                        tag_usage_value = tag_usage.unwrap().to_string()
-                    }
-
                     result.push(Edge {
                         id: format!("{}-{}", way.id.0, result.len()),
                         osm_id: way.id,
                         source,
                         target: node_id,
                         geometry,
-                        properties: way.properties,
-                        tags: tag_usage_value,
+                        properties: way.properties.clone(),
                     });
 
                     source = node_id;
@@ -114,8 +106,7 @@ impl Reader {
                         skip = true;
                     }
                 }
-                properties.normalize();
-                if properties.accessible() && !skip {
+                if properties.has_railway_tag && !skip {
                     for node in &way.nodes {
                         self.nodes_to_keep.insert(*node);
                     }
@@ -123,7 +114,6 @@ impl Reader {
                         id: way.id,
                         nodes: way.nodes,
                         properties,
-                        tags: way.tags,
                     });
                 }
             }

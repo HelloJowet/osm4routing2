@@ -34,7 +34,6 @@ pub struct Edge {
     pub target: NodeId,
     pub geometry: Vec<Coord>,
     pub properties: EdgeProperties,
-    pub tags: String,
 }
 
 impl Edge {

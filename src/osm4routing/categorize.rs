@@ -1,35 +1,24 @@
-use serde::Serialize;
-
-#[derive(Clone, Copy, Debug, Serialize, PartialEq)]
-pub enum TrainAccessibility {
-    Unknown,
-    Forbidden,
-    Allowed,
-}
-
 // Edgeself contains what mode can use the edge in each direction
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct EdgeProperties {
-    pub railway: TrainAccessibility,
+    pub has_railway_tag: bool,
+    pub railway_type: String,
+    pub usage: String,
+    pub service: String,
 }
 
 impl Default for EdgeProperties {
     fn default() -> EdgeProperties {
         EdgeProperties {
-            railway: TrainAccessibility::Unknown,
+            has_railway_tag: false,
+            railway_type: String::new(),
+            usage: String::new(),
+            service: String::new(),
         }
     }
 }
 
 impl EdgeProperties {
-    // Normalize fills UNKNOWN fields
-    pub fn normalize(&mut self) {}
-
-    // Accessible means that at least one mean of transportation can use it in one direction
-    pub fn accessible(self) -> bool {
-        self.railway == TrainAccessibility::Allowed
-    }
-
     pub fn update(&mut self, key_string: String, val_string: String) {
         let key = key_string.as_str();
         let val = val_string.as_str();
@@ -38,7 +27,12 @@ impl EdgeProperties {
 
     pub fn update_with_str(&mut self, key: &str, val: &str) {
         match key {
-            "railway" => self.railway = TrainAccessibility::Allowed,
+            "railway" => {
+                self.has_railway_tag = true;
+                self.railway_type = val.to_string()
+            }
+            "usage" => self.usage = val.to_string(),
+            "service" => self.service = val.to_string(),
             _ => {}
         }
     }
