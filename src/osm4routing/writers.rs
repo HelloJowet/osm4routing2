@@ -5,23 +5,21 @@ pub fn csv(nodes: Vec<Node>, edges: Vec<Edge>) {
     let mut edges_csv = csv::Writer::from_path(edges_path).unwrap();
     edges_csv
         .serialize(vec![
-            "id",
-            "length",
             "railway_type",
             "usage",
             "service",
             "geometry",
+            "approximate_centerpoint_geohash",
         ])
         .expect("CSV: unable to write edge header");
     for edge in edges {
         edges_csv
             .serialize((
-                &edge.id,
-                edge.length(),
                 edge.properties.railway_type.clone(),
                 edge.properties.usage.clone(),
                 edge.properties.service.clone(),
                 edge.as_wkt(),
+                edge.get_approximate_centerpoint_geohash(),
             ))
             .expect("CSV: unable to write edge");
     }

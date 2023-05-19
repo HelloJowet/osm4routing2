@@ -1,4 +1,5 @@
 use super::categorize::EdgeProperties;
+use geohash::{encode, Coord as GeohashCoord};
 use osmpbfreader::objects::{NodeId, WayId};
 
 // Coord are coordinates in decimal degress WGS84
@@ -48,26 +49,17 @@ impl Edge {
         format!("LINESTRING({})", coords.as_slice().join(", "))
     }
 
-    // Length in meters of the edge
-    pub fn length(&self) -> f64 {
-        self.geometry
-            .windows(2)
-            .map(|coords| distance(coords[0], coords[1]))
-            .sum()
+    pub fn get_approximate_centerpoint_geohash(&self) -> String {
+        let line_geometry_coord_count: usize = self.geometry.len();
+        let line_geometry_approximate_centerpoint = self.geometry[line_geometry_coord_count / 2];
+        let approximate_centerpoint_geohash_coord_object = GeohashCoord {
+            x: line_geometry_approximate_centerpoint.lon,
+            y: line_geometry_approximate_centerpoint.lat,
+        };
+
+        match encode(approximate_centerpoint_geohash_coord_object, 9usize) {
+            Err(error) => panic!("Problem creating geohash: {:?}", error),
+            Ok(f) => f,
+        }
     }
-}
-
-fn distance(start: Coord, end: Coord) -> f64 {
-    let r: f64 = 6_378_100.0;
-
-    let d_lon: f64 = (end.lon - start.lon).to_radians();
-    let d_lat: f64 = (end.lat - start.lat).to_radians();
-    let lat1: f64 = (start.lat).to_radians();
-    let lat2: f64 = (end.lat).to_radians();
-
-    let a: f64 = ((d_lat / 2.0).sin()) * ((d_lat / 2.0).sin())
-        + ((d_lon / 2.0).sin()) * ((d_lon / 2.0).sin()) * (lat1.cos()) * (lat2.cos());
-    let c: f64 = 2.0 * ((a.sqrt()).atan2((1.0 - a).sqrt()));
-
-    r * c
 }
