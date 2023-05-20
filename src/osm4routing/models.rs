@@ -1,5 +1,5 @@
 use super::categorize::EdgeProperties;
-use geohash::{encode, Coord as GeohashCoord};
+use geohashrust::{BinaryHash, GeoLocation};
 use osmpbfreader::objects::{NodeId, WayId};
 
 // Coord are coordinates in decimal degress WGS84
@@ -49,17 +49,23 @@ impl Edge {
         format!("LINESTRING({})", coords.as_slice().join(", "))
     }
 
-    pub fn get_approximate_centerpoint_geohash(&self) -> String {
-        let line_geometry_coord_count: usize = self.geometry.len();
-        let line_geometry_approximate_centerpoint = self.geometry[line_geometry_coord_count / 2];
-        let approximate_centerpoint_geohash_coord_object = GeohashCoord {
-            x: line_geometry_approximate_centerpoint.lon,
-            y: line_geometry_approximate_centerpoint.lat,
-        };
+    pub fn get_geohashes(&self, precision: u8) -> Vec<String> {
+        let mut geohashes: Vec<String> = Vec::new();
 
-        match encode(approximate_centerpoint_geohash_coord_object, 9usize) {
-            Err(error) => panic!("Problem creating geohash: {:?}", error),
-            Ok(f) => f,
+        for coord in self.geometry.clone().iter_mut() {
+            let geo_location = GeoLocation {
+                latitude: coord.lat,
+                longitude: coord.lon,
+            };
+            let binary_hash = BinaryHash::encode(&geo_location, precision);
+
+            geohashes.push(binary_hash.to_string());
         }
+
+        // remove duplicated geohashes
+        geohashes.sort_unstable();
+        geohashes.dedup();
+
+        return geohashes;
     }
 }
