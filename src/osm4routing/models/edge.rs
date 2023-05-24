@@ -1,4 +1,5 @@
-use super::super::categorize::railway::edge_properties::EdgeProperties;
+use super::super::categorize::edge_properties::EdgeProperties;
+// use super::super::categorize::railway::edge_properties::EdgeProperties;
 use super::coord::Coord;
 use geohashrust::{BinaryHash, GeoLocation};
 use osmpbfreader::objects::{NodeId, WayId};

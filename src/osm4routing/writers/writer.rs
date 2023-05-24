@@ -1,16 +1,19 @@
 use super::super::models::{edge::Edge, node::Node};
 use super::{edges, geohashes, nodes};
+use crate::ProfileType;
 
 pub struct Writer {
     nodes: Vec<Node>,
     edges: Vec<Edge>,
+    profile_type: ProfileType,
 }
 
 impl Writer {
-    pub fn new(nodes: Vec<Node>, edges: Vec<Edge>) -> Writer {
+    pub fn new(nodes: Vec<Node>, edges: Vec<Edge>, profile_type: ProfileType) -> Writer {
         Writer {
             nodes: nodes,
             edges: edges,
+            profile_type: profile_type,
         }
     }
 
@@ -24,11 +27,11 @@ impl Writer {
         }
 
         nodes::create_nodes_csv(self.nodes.clone());
-        edges::create_edges_csv(self.edges.clone());
+        edges::create_edges_csv(self.edges.clone(), self.profile_type);
         geohashes::create_geohashes_csv(geohashes, geohash_precision);
     }
 }
 
-pub fn write(nodes: Vec<Node>, edges: Vec<Edge>) {
-    Writer::new(nodes, edges);
+pub fn write(nodes: Vec<Node>, edges: Vec<Edge>, profile_type: ProfileType) {
+    Writer::new(nodes, edges, profile_type).to_csv();
 }

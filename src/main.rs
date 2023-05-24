@@ -1,12 +1,30 @@
+use clap::Parser;
+use osm4routing::ProfileType;
+
+/// Extract a road or railway network from Openstreetmap as a graph ready for routing
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Input path (<source.osm.pbf>)
+    #[arg(short, long)]
+    input: String,
+
+    /// Profile type
+    #[arg(short, long)]
+    profile: String,
+}
+
 fn main() {
-    const USAGE: &str = "Usage: osm4routing <source.osm.pbf>";
-    let args = docopt::Docopt::new(USAGE)
-        .unwrap()
-        .parse()
-        .unwrap_or_else(|e| e.exit());
-    let filename = args.get_str("<source.osm.pbf>");
-    match osm4routing::read(filename) {
-        Ok((nodes, edges)) => osm4routing::write(nodes, edges),
+    let args = Args::parse();
+
+    let profile_type = match args.profile.as_str() {
+        "railway" => ProfileType::Railway,
+        "road" => ProfileType::Road,
+        _ => panic!("specified profile isn't implemented"),
+    };
+
+    match osm4routing::read(args.input.as_str(), profile_type) {
+        Ok((nodes, edges)) => osm4routing::write(nodes, edges, profile_type),
         Err(error) => println!("Error: {}", error),
     }
 }
