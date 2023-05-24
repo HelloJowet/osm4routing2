@@ -1,5 +1,5 @@
-use super::categorize::*;
-use super::models::*;
+use super::categorize::railway::edge_properties::EdgeProperties;
+use super::models::{coord::Coord, edge::Edge, node::Node};
 use osmpbfreader::objects::{NodeId, WayId};
 use std::collections::{HashMap, HashSet};
 

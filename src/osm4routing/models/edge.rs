@@ -1,33 +1,10 @@
-use super::categorize::EdgeProperties;
+use super::super::categorize::railway::edge_properties::EdgeProperties;
+use super::coord::Coord;
 use geohashrust::{BinaryHash, GeoLocation};
 use osmpbfreader::objects::{NodeId, WayId};
 
-// Coord are coordinates in decimal degress WGS84
-#[derive(Copy, Clone, Default)]
-pub struct Coord {
-    pub lon: f64,
-    pub lat: f64,
-}
-
-// Node is the OpenStreetMap node
-#[derive(Copy, Clone)]
-pub struct Node {
-    pub id: NodeId,
-    pub coord: Coord,
-    pub uses: i16,
-}
-
-impl Default for Node {
-    fn default() -> Node {
-        Node {
-            id: NodeId(0),
-            coord: Default::default(),
-            uses: Default::default(),
-        }
-    }
-}
-
 // Edge is a topological representation with only two extremities and no geometry
+#[derive(Clone)]
 pub struct Edge {
     pub id: String,
     pub osm_id: WayId,

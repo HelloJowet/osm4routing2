@@ -1,54 +1,7 @@
-use super::models::*;
 use geohashrust::BinaryHash;
 use polars::prelude::*;
 
-pub fn csv(nodes: Vec<Node>, edges: &Vec<Edge>) {
-    let geohash_precision: u8 = 24;
-
-    let mut geohashes: Vec<String> = Vec::new();
-    for edge in edges.iter() {
-        let mut edge_geohashes = edge.get_geohashes(geohash_precision);
-        geohashes.append(&mut edge_geohashes);
-    }
-
-    create_edges_csv(&edges.clone());
-    create_nodes_csv(nodes);
-    create_geohash_csv(geohashes, geohash_precision);
-}
-
-pub fn create_edges_csv(edges: &Vec<Edge>) {
-    let edges_path = std::path::Path::new("edges.csv");
-    let mut edges_csv = csv::Writer::from_path(edges_path).unwrap();
-    edges_csv
-        .serialize(vec!["railway_type", "usage", "service", "geometry"])
-        .expect("CSV: unable to write edge header");
-
-    for edge in edges {
-        edges_csv
-            .serialize((
-                edge.properties.railway_type.clone(),
-                edge.properties.usage.clone(),
-                edge.properties.service.clone(),
-                edge.as_wkt(),
-            ))
-            .expect("CSV: unable to write edge");
-    }
-}
-
-pub fn create_nodes_csv(nodes: Vec<Node>) {
-    let nodes_path = std::path::Path::new("nodes.csv");
-    let mut nodes_csv = csv::Writer::from_path(nodes_path).unwrap();
-    nodes_csv
-        .serialize(vec!["id", "lon", "lat"])
-        .expect("CSV: unable to write node header");
-    for node in nodes {
-        nodes_csv
-            .serialize((node.id.0, node.coord.lon, node.coord.lat))
-            .expect("CSV: unable to write node");
-    }
-}
-
-pub fn create_geohash_csv(geohashes: Vec<String>, geohash_precision: u8) {
+pub fn create_geohashes_csv(geohashes: Vec<String>, geohash_precision: u8) {
     let max_allowed_features_in_geohash = 1000;
 
     let mut final_geohashes: Vec<String> = Vec::new();
@@ -140,5 +93,3 @@ pub fn create_geohash_csv(geohashes: Vec<String>, geohash_precision: u8) {
             .expect("CSV: unable to write geohash");
     }
 }
-
-// pub fn pg(nodes: Vec<Node>, edges: Vec<Edge>) {}
