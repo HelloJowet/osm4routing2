@@ -18,7 +18,7 @@ impl Writer {
     }
 
     pub fn to_csv(&self) {
-        let geohash_precision: u8 = 24;
+        let geohash_precision: u8 = 28;
 
         let mut geohashes: Vec<String> = Vec::new();
         for edge in self.edges.iter() {

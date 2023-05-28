@@ -7,12 +7,9 @@ pub fn create_edges_csv(edges: Vec<Edge>, profile_type: ProfileType) {
     let mut edges_csv = csv::Writer::from_path(edges_path).unwrap();
 
     let edges_csv_columns = match profile_type {
-        ProfileType::Railway => vec!["railway_type", "usage", "service", "geometry"],
+        ProfileType::Railway => vec!["edge_id", "railway_type", "usage", "service", "geometry"],
         ProfileType::Road => vec![
-            "id",
-            "osm_id",
-            "source",
-            "target",
+            "edge_id",
             "foot",
             "car_forward",
             "car_backward",
@@ -32,6 +29,7 @@ pub fn create_edges_csv(edges: Vec<Edge>, profile_type: ProfileType) {
             EdgeProperties::RailwayEdgeProperties(edge_properties) => {
                 edges_csv
                     .serialize((
+                        &edge.id,
                         edge_properties.railway_type.clone(),
                         edge_properties.usage.clone(),
                         edge_properties.service.clone(),
@@ -43,9 +41,6 @@ pub fn create_edges_csv(edges: Vec<Edge>, profile_type: ProfileType) {
                 edges_csv
                     .serialize((
                         &edge.id,
-                        edge.osm_id.0,
-                        edge.source.0,
-                        edge.target.0,
                         edge_properties.foot,
                         edge_properties.car_forward,
                         edge_properties.car_backward,

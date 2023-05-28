@@ -28,8 +28,19 @@ impl EdgeProperties {
     pub fn update_with_str(&mut self, key: &str, val: &str) {
         match key {
             "railway" => {
-                self.has_railway_tag = true;
-                self.railway_type = val.to_string()
+                let allowed_railway_types = vec![
+                    "light_rail",
+                    "monorail",
+                    "narrow_gauge",
+                    "rail",
+                    "subway",
+                    "tram",
+                ];
+
+                if allowed_railway_types.contains(&val) {
+                    self.has_railway_tag = true;
+                    self.railway_type = val.to_string()
+                }
             }
             "usage" => self.usage = val.to_string(),
             "service" => self.service = val.to_string(),
