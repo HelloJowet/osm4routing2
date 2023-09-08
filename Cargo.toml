@@ -14,7 +14,7 @@ csv = "1.1.3"
 docopt = "1.1.0"
 serde = "1.0"
 geohashrust = "0.0.2"
-polars = {version = "0.29.0", features = ["lazy"]}
+polars = {version = "0.32.1", features = ["lazy"]}
 clap = {version = "4.3.0", features = ["derive"]}
 
 [lib]
